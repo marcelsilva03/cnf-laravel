@@ -1,0 +1,8 @@
+#caixa-de-notificacao {
+    top: -150px;
+    transition: top 0.75s ease-in-out;
+}
+
+#caixa-de-notificacao.notificao-aparente {
+    top: 0;
+}

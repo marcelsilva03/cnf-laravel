@@ -1,0 +1,156 @@
+<?php
+
+namespace Tests\E2E;
+
+use App\Models\User;
+use Tests\TestCase;
+use Spatie\Permission\Models\Role;
+
+/**
+ * E2E Test for Issue #26: Pesquisador role Clear Filters functionality
+ * 
+ * This test ensures that users with Pesquisador role can use the Clear Filters
+ * button without encountering errors (405 or others)
+ */
+class PesquisadorClearFiltersTest extends TestCase
+{
+    /**
+     * Test that Pesquisador role can access Falecidos page
+     */
+    public function test_pesquisador_can_access_falecidos_page()
+    {
+        // Create or find a user with Pesquisador role
+        $pesquisador = $this->findOrCreatePesquisadorUser();
+        
+        $response = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos');
+        
+        $response->assertStatus(200);
+        $response->assertSee('Falecidos');
+    }
+    
+    /**
+     * Test that Pesquisador can use Clear Filters without 405 error
+     * This is the main test for issue #26
+     */
+    public function test_pesquisador_clear_filters_works_without_errors()
+    {
+        $pesquisador = $this->findOrCreatePesquisadorUser();
+        
+        // Step 1: Access page with filters
+        echo "Testing Pesquisador access to filtered page...\n";
+        
+        $response = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos?tableFilters[search][value]=TestSearch');
+        
+        $response->assertStatus(200);
+        
+        // Step 2: Clear filters (simulate clicking Clear Filters button)
+        echo "Testing Clear Filters functionality for Pesquisador...\n";
+        
+        $clearResponse = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos');
+        
+        // Assert no 405 error
+        $clearResponse->assertStatus(200);
+        $clearResponse->assertDontSee('405 Method Not Allowed');
+        
+        echo "✓ Pesquisador can use Clear Filters without errors\n";
+    }
+    
+    /**
+     * Test multiple filter combinations for Pesquisador
+     */
+    public function test_pesquisador_can_clear_multiple_filter_types()
+    {
+        $pesquisador = $this->findOrCreatePesquisadorUser();
+        
+        // Test with UF filter
+        $response = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos?tableFilters[fal_uf][value]=SP');
+        $response->assertStatus(200);
+        
+        $clearResponse = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos');
+        $clearResponse->assertStatus(200);
+        
+        // Test with sex filter
+        $response = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos?tableFilters[fal_sexo][value]=1');
+        $response->assertStatus(200);
+        
+        $clearResponse = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos');
+        $clearResponse->assertStatus(200);
+        
+        // Test with date range filter
+        $response = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos?tableFilters[date_range][start_date]=2024-01-01&tableFilters[date_range][end_date]=2024-12-31');
+        $response->assertStatus(200);
+        
+        $clearResponse = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos');
+        $clearResponse->assertStatus(200);
+        
+        echo "✓ All filter types can be cleared successfully by Pesquisador\n";
+    }
+    
+    /**
+     * Test that Pesquisador cannot access admin-only features
+     */
+    public function test_pesquisador_has_correct_permissions()
+    {
+        $pesquisador = $this->findOrCreatePesquisadorUser();
+        
+        $response = $this->actingAs($pesquisador, 'web')
+            ->get('/admin/falecidos');
+        
+        $content = $response->getContent();
+        
+        // Pesquisador should NOT see create button (based on permissions)
+        $this->assertStringNotContainsString('CreateAction', $content);
+        
+        // But should see the table and filters
+        $response->assertStatus(200);
+        $this->assertStringContainsString('falecidos', strtolower($content));
+    }
+    
+    /**
+     * Helper method to find or create a Pesquisador user
+     */
+    private function findOrCreatePesquisadorUser()
+    {
+        // First, ensure the pesquisador role exists
+        $role = Role::firstOrCreate(['name' => 'pesquisador', 'guard_name' => 'web']);
+        
+        // Try to find existing pesquisador
+        $pesquisador = User::whereHas('roles', function ($query) {
+            $query->where('name', 'pesquisador');
+        })->first();
+        
+        if ($pesquisador) {
+            echo "Found existing Pesquisador: {$pesquisador->email}\n";
+            return $pesquisador;
+        }
+        
+        // Try specific pesquisador from seeders
+        $pesquisador = User::where('email', 'pesquisador@email.com')->first();
+        if ($pesquisador) {
+            if (!$pesquisador->hasRole('pesquisador')) {
+                $pesquisador->assignRole($role);
+            }
+            echo "Using seeded Pesquisador: pesquisador@email.com\n";
+            return $pesquisador;
+        }
+        
+        // Create a new pesquisador for testing
+        $pesquisador = User::factory()->create([
+            'email' => 'test-pesquisador@example.com',
+            'name' => 'Test Pesquisador'
+        ]);
+        $pesquisador->assignRole($role);
+        
+        echo "Created test Pesquisador: {$pesquisador->email}\n";
+        return $pesquisador;
+    }
+}

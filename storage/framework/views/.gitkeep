@@ -1,0 +1,2 @@
+# Este arquivo garante que o diretório storage/framework/views seja mantido no Git
+# O Laravel precisa deste diretório para cache de views compiladas 

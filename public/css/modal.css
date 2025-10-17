@@ -1,0 +1,22 @@
+@charset "UTF-8";
+
+body.modal-open {
+    overflow: hidden;
+}
+
+#modal-overlay,
+#cobertura-carregamento-tela {
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background-color: rgba(0,0,0,0.8);
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+
+@media (min-width: 1200px) {
+    #modal-container {
+        width: 760px;
+    }
+}

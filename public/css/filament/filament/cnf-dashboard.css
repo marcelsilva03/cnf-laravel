@@ -1,0 +1,141 @@
+ul, ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+button:hover {
+    background-color: none !important;
+}
+
+/* Forms */
+input[type="text"], input[type="email"], textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #0077ff;
+}
+
+/* CNF NEW RULES */
+body {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/images/slide/slide-1.jpg');
+}
+
+aside {
+    background-color: transparent !important;
+}
+aside .overflow-x-clip {
+    padding: 10px 0 !important;
+}
+aside .fi-sidebar-nav {
+    padding: 0 0 0 1.5rem;
+}
+aside .fi-sidebar-nav .fi-sidebar-nav-groups {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.fi-topbar {
+    padding: 10px 0 !important;
+}
+
+.fi-sidebar-item .fi-sidebar-item-label {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+
+
+.fi-main-ctn section {
+    margin-bottom: 4rem;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Ensure full width for elements */
+* {
+    box-sizing: border-box;
+}
+
+.full-width {
+    width: 100%; /* Fills the entire width of the parent */
+}
+
+/* Reduce spacing between navigation groups */
+.fi-sidebar-nav-groups {
+    gap: 0 !important; /* Remove gap between groups */
+}
+
+.fi-sidebar-group {
+    margin-top: 0.5rem !important; /* Reduce top margin of each group */
+    margin-bottom: 0.5rem !important; /* Reduce bottom margin of each group */
+    padding-top: 0.5rem !important; /* Reduce top padding of each group */
+    padding-bottom: 0.5rem !important; /* Reduce bottom padding of each group */
+}
+
+.fi-sidebar-group-items {
+    margin-top: 0.25rem !important; /* Reduce space between group label and items */
+}
+
+/* Fix chevron rotation for navigation groups */
+.fi-sidebar-group button svg {
+    transition: transform 0.15s ease-in-out;
+}
+
+.fi-sidebar-group button[aria-expanded="true"] svg {
+    transform: rotate(90deg) !important;
+}
+
+.fi-sidebar-group button[aria-expanded="false"] svg {
+    transform: rotate(0deg) !important;
+}
+
+/* Override any specific group behaviors to ensure consistency */
+[data-group-label] button[aria-expanded="true"] svg {
+    transform: rotate(90deg) !important;
+}
+
+[data-group-label] button[aria-expanded="false"] svg {
+    transform: rotate(0deg) !important;
+}
+
+/* Dashboard Stats Cards */
+.fi-wi-stats-overview {
+    @apply gap-6;
+}
+
+.fi-wi-stats-overview-stat {
+    @apply rounded-xl bg-white/50 backdrop-blur-xl shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900/50 dark:ring-white/10;
+    transition: transform 0.2s ease-in-out;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+}
+
+.fi-wi-stats-overview-stat-description {
+    @apply flex items-center gap-1 text-sm font-medium;
+}
+
+.fi-wi-stats-overview-stat-icon {
+    @apply h-5 w-5 opacity-70;
+}

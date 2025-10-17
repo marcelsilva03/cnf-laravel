@@ -1,0 +1,2 @@
+<small class="d-flex justify-content-end" data-counter-for="<?php echo e($dataCounterFor); ?>"></small>
+<?php /**PATH /home/cnfbr/laravel_teste/resources/views/partials/contadorTextArea.blade.php ENDPATH**/ ?>

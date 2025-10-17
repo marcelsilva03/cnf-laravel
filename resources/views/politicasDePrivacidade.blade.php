@@ -1,0 +1,21 @@
+@extends('layouts.bgSectionPage')
+
+@section('box-content')
+    @include('partials.polprivTitulo')
+    @include('partials.polprivIntro')
+    @include('partials.polprivSeguranca')
+    @include('partials.polprivEstatistica')
+    @include('partials.polprivOpt')
+    @include('partials.polprivCookies')
+    @include('partials.polprivSiteTerceiros')
+    @include('partials.polprivInfantil')
+    @include('partials.polprivAceite')
+    @include('partials.polprivNotificacoes')
+    @include('partials.polprivAtualizacao')
+    <hr>
+    @include('partials.termosIntro')
+    @include('partials.termosProtecaoDados')
+    @include('partials.termosCompartilhamento')
+    @include('partials.termosAlteracoes')
+    @include('partials.termosAceite')
+@endsection

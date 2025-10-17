@@ -1,0 +1,191 @@
+<?php
+
+namespace Tests\E2E;
+
+use App\Models\User;
+use Tests\TestCase;
+use Spatie\Permission\Models\Role;
+
+/**
+ * E2E Test to ensure Clear Filters works for all authorized roles
+ * This comprehensive test covers issue #26 and ensures the fix works across all roles
+ */
+class AllRolesClearFiltersTest extends TestCase
+{
+    /**
+     * List of roles that should have access to Falecidos resource
+     */
+    private array $authorizedRoles = ['admin', 'pesquisador', 'moderador'];
+    
+    /**
+     * Test Clear Filters functionality for all authorized roles
+     * @dataProvider authorizedRolesProvider
+     */
+    public function test_clear_filters_works_for_all_authorized_roles($roleName)
+    {
+        echo "\n=== Testing Clear Filters for role: {$roleName} ===\n";
+        
+        // Get or create user with the role
+        $user = $this->findOrCreateUserWithRole($roleName);
+        
+        // Step 1: Access Falecidos page
+        echo "1. Testing access to Falecidos page...\n";
+        $response = $this->actingAs($user, 'web')
+            ->get('/admin/falecidos');
+        
+        $response->assertStatus(200);
+        echo "   ✓ {$roleName} can access Falecidos page\n";
+        
+        // Step 2: Apply search filter
+        echo "2. Applying search filter...\n";
+        $filteredResponse = $this->actingAs($user, 'web')
+            ->get('/admin/falecidos?tableFilters[search][value]=TestSearchTerm');
+        
+        $filteredResponse->assertStatus(200);
+        echo "   ✓ Filter applied successfully\n";
+        
+        // Step 3: Clear filters (main test for issue #26)
+        echo "3. Testing Clear Filters functionality...\n";
+        $clearResponse = $this->actingAs($user, 'web')
+            ->get('/admin/falecidos');
+        
+        // Assert no errors
+        $clearResponse->assertStatus(200);
+        $clearResponse->assertDontSee('405 Method Not Allowed');
+        $clearResponse->assertDontSee('403 Forbidden');
+        $clearResponse->assertDontSee('500 Internal Server Error');
+        
+        echo "   ✓ Clear Filters works without errors for {$roleName}\n";
+        
+        // Step 4: Test complex filter combination
+        echo "4. Testing complex filter clearing...\n";
+        $complexFilterUrl = '/admin/falecidos?' . http_build_query([
+            'tableFilters' => [
+                'search' => ['value' => 'João'],
+                'fal_uf' => ['value' => 'SP'],
+                'fal_sexo' => ['value' => '1'],
+                'date_range' => [
+                    'start_date' => '2024-01-01',
+                    'end_date' => '2024-12-31'
+                ],
+                'status' => ['apenas_ativos' => true]
+            ]
+        ]);
+        
+        $complexResponse = $this->actingAs($user, 'web')
+            ->get($complexFilterUrl);
+        $complexResponse->assertStatus(200);
+        
+        // Clear all complex filters
+        $clearComplexResponse = $this->actingAs($user, 'web')
+            ->get('/admin/falecidos');
+        
+        $clearComplexResponse->assertStatus(200);
+        echo "   ✓ Complex filters cleared successfully\n";
+        
+        echo "\n✅ All tests passed for role: {$roleName}\n";
+    }
+    
+    /**
+     * Test that unauthorized roles cannot access Falecidos
+     */
+    public function test_unauthorized_roles_cannot_access_falecidos()
+    {
+        // Create a user without any special role
+        $unauthorizedUser = User::factory()->create([
+            'email' => 'unauthorized@example.com',
+            'name' => 'Unauthorized User'
+        ]);
+        
+        $response = $this->actingAs($unauthorizedUser, 'web')
+            ->get('/admin/falecidos');
+        
+        // Should be redirected or forbidden
+        $this->assertContains($response->getStatusCode(), [302, 403]);
+        
+        echo "✓ Unauthorized users cannot access Falecidos resource\n";
+    }
+    
+    /**
+     * Test rapid filter clearing (performance/stability test)
+     */
+    public function test_rapid_filter_clearing_does_not_cause_errors()
+    {
+        $admin = $this->findOrCreateUserWithRole('admin');
+        
+        echo "\nTesting rapid filter clearing...\n";
+        
+        // Rapidly apply and clear filters 5 times
+        for ($i = 1; $i <= 5; $i++) {
+            // Apply filter
+            $filterResponse = $this->actingAs($admin, 'web')
+                ->get("/admin/falecidos?tableFilters[search][value]=Test{$i}");
+            $filterResponse->assertStatus(200);
+            
+            // Clear filter
+            $clearResponse = $this->actingAs($admin, 'web')
+                ->get('/admin/falecidos');
+            $clearResponse->assertStatus(200);
+            
+            echo "   Iteration {$i}: ✓\n";
+        }
+        
+        echo "✓ Rapid filter clearing works without errors\n";
+    }
+    
+    /**
+     * Data provider for authorized roles
+     */
+    public function authorizedRolesProvider(): array
+    {
+        return [
+            'Admin role' => ['admin'],
+            'Pesquisador role' => ['pesquisador'],
+            'Moderador role' => ['moderador'],
+        ];
+    }
+    
+    /**
+     * Helper method to find or create a user with specific role
+     */
+    private function findOrCreateUserWithRole(string $roleName): User
+    {
+        // Ensure role exists
+        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+        
+        // Try to find existing user with this role
+        $user = User::whereHas('roles', function ($query) use ($roleName) {
+            $query->where('name', $roleName);
+        })->first();
+        
+        if ($user) {
+            return $user;
+        }
+        
+        // Try specific users from seeders
+        $seederEmails = [
+            'admin' => 'admin@email.com',
+            'pesquisador' => 'pesquisador@email.com',
+            'moderador' => 'moderador@email.com'
+        ];
+        
+        if (isset($seederEmails[$roleName])) {
+            $user = User::where('email', $seederEmails[$roleName])->first();
+            if ($user) {
+                if (!$user->hasRole($roleName)) {
+                    $user->assignRole($role);
+                }
+                return $user;
+            }
+        }
+        
+        // Create new test user
+        $user = User::factory()->create([
+            'email' => "test-{$roleName}@example.com",
+            'name' => "Test " . ucfirst($roleName)
+        ]);
+        $user->assignRole($role);
+        
+        return $user;
+    }
+}

@@ -1,0 +1,57 @@
+/* ==========================================================================
+   Hero & Search Form Positioning
+   ========================================================================== */
+
+#hero {
+ /* cria espaço interno igual à altura do header + 1rem */
+ padding-top: calc(80px + 1rem);
+}
+
+#form-container {
+  /* volta ao fluxo normal do documento */
+  position: relative;
+  margin: 0 auto;         /* centraliza */
+  width: 90%;
+  max-width: 400px;
+  z-index: 5;             /* ainda acima dos slides */
+  transform: none;
+  top: auto;
+  left: auto;
+}
+
+/* Garante que nada seja cortado pelo overflow do carousel */
+.carousel-inner {
+  overflow: visible;
+}
+
+/* Empurra os bullets do carousel para não colidir com o form */
+#heroCarousel .carousel-indicators {
+  bottom: 1rem;
+  z-index: 10;                /* acima do formulário */
+}
+
+/* ==========================================================================
+   Media queries para refinamento em telas menores
+   ========================================================================== */
+
+@media (max-width: 992px) {
+  #form-container {
+    top: calc(70px + 1rem);  /* header mais compacto em breakpoints médios */
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 576px) {
+  #form-container {
+    top: calc(60px + 0.5rem); /* header ainda menor em smartphones */
+    width: 100%;
+    padding: 0 .5rem;
+  }
+}
+
+/* garante que o widget seja exibido e fique acima dos slides */
+#form-container .g-recaptcha {
+  display: block !important;
+  margin: 1rem auto 0;
+  z-index: 6;              /* acima do form-container (z-index:5) */
+}
