@@ -19,3 +19,51 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# === LARAVEL PADRÃO ===
+/vendor
+/node_modules
+/public/hot
+/public/build
+/public/storage
+/storage/*.key
+/storage/logs/*
+/bootstrap/cache/*.php
+
+# === AMBIENTES (.env) ===
+.env
+.env.*
+!.env.example   # mantém apenas o modelo
+!.env.teste     # se quiser deixar um modelo de teste público
+
+# === TESTES E FERRAMENTAS ===
+/.phpunit.cache
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+
+# === CONFIGURAÇÕES DE IDE ===
+/.fleet
+/.idea
+/.vscode
+
+# === LOGS E DUMPS ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+composer.lock
+auth.json
+
+# === CERTIFICADOS E CHAVES SENSÍVEIS ===
+/certs/*.p12
+/certs/*.pem
+/certs/*.key
+/certs/*.crt
+
+# === ARQUIVOS TEMPORÁRIOS OU BACKUPS ===
+*.bak
+*.backup
+*.old
+*.tmp
+*.swp
+
